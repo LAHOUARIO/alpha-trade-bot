@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>لوحة الإدارة - ALPHA TRADE ACADEMY</title>
+  <style>
+    body {
+      background-color: #111;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 30px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    form {
+      max-width: 400px;
+      margin: 0 auto;
+      background: #1f1f1f;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #000;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: none;
+      font-size: 16px;
+    }
+
+    input {
+      background-color: #222;
+      color: #fff;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .message {
+      margin-top: 10px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .error {
+      color: red;
+    }
+
+    .success {
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <h1>لوحة إدارة المستخدمين</h1>
+  <form id="adminForm">
+    <input type="text" name="adminUser" placeholder="اسم المدير" required />
+    <input type="password" name="adminPass" placeholder="كلمة سر المدير" required />
+    <hr>
+    <input type="text" name="username" placeholder="اسم المستخدم الجديد" required />
+    <input type="password" name="password" placeholder="كلمة سر المستخدم" required />
+    <input type="number" name="durationDays" placeholder="مدة الاشتراك بالأيام" required />
+    <button type="submit">➕ إضافة المستخدم</button>
+    <div class="message" id="msg"></div>
+  </form>
+
+  <script>
+    const form = document.getElementById("adminForm");
+    const msg = document.getElementById("msg");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      msg.textContent = "";
+      msg.className = "message";
+
+      const data = {
+        adminUser: form.adminUser.value,
+        adminPass: form.adminPass.value,
+        username: form.username.value,
+        password: form.password.value,
+        durationDays: form.durationDays.value
+      };
+
+      const res = await fetch("/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      const text = await res.text();
+
+      if (res.ok) {
+        msg.textContent = text;
+        msg.classList.add("success");
+      } else {
+        msg.textContent = text;
+        msg.classList.add("error");
+      }
+    });
+  </script>
+</body>
+</html>

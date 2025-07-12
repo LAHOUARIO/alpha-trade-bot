@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>ALPHA TRADE ACADEMY - دخول</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom, #000000, #111111);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    h1 {
+      color: gold;
+      margin-bottom: 20px;
+    }
+    form {
+      background: #1a1a1a;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #000;
+      width: 300px;
+      display: flex;
+      flex-direction: column;
+    }
+    input {
+      margin: 10px 0;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    button {
+      background: gold;
+      color: #000;
+      font-weight: bold;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #ffd700;
+    }
+    .error {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>ALPHA TRADE ACADEMY</h1>
+  <form id="loginForm">
+    <input type="text" name="username" placeholder="اسم المستخدم" required />
+    <input type="password" name="password" placeholder="كلمة السر" required />
+    <button type="submit">دخول</button>
+    <div class="error" id="errorMsg"></div>
+  </form>
+
+  <script>
+    const form = document.getElementById("loginForm");
+    const errorMsg = document.getElementById("errorMsg");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorMsg.textContent = "";
+
+      const data = {
+        username: form.username.value,
+        password: form.password.value
+      };
+
+      const res = await fetch("/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      const text = await res.text();
+
+      if (res.ok) {
+        localStorage.setItem("loggedIn", "true");
+        window.location.href = "/dashboard.html";
+      } else {
+        errorMsg.textContent = text;
+      }
+    });
+  </script>
+</body>
+</html>
