@@ -173,7 +173,7 @@ function analyzeAsset(price, history, assetName) {
 
 // 🚀 إرسال لتليغرام
 async function sendToTelegram(text) {
-  const url = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage";
+ const url = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`;
   await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
