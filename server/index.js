@@ -1,3 +1,4 @@
+
 // 🔧 إعداد البيئة
 require("dotenv").config();
 const express = require("express");
@@ -91,21 +92,37 @@ app.get("/signals", (req, res) => {
 
 // ✅ سعر الذهب
 async function fetchGoldPrice() {
-  const response = await fetch("https://www.goldapi.io/api/XAU/USD", {
-    headers: {
-      "x-access-token": process.env.GOLD_API_KEY,
-      "Content-Type": "application/json",
-    },
-  });
-  const data = await response.json();
-  return data.price;
+  try {
+    const response = await fetch("https://www.goldapi.io/api/XAU/USD", {
+      headers: {
+        "x-access-token": process.env.GOLD_API_KEY,
+        "Content-Type": "application/json",
+      },
+    });
+    const data = await response.json();
+    console.log("🧪 GOLD API Response:", data);
+    return data.price || null;
+  } catch (error) {
+    console.error("❌ fetchGoldPrice Error:", error.message);
+    return null;
+  }
 }
 
 // ✅ سعر البيتكوين
 async function fetchBTCPrice() {
-  const response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd");
-  const data = await response.json();
-  return data.bitcoin.usd;
+  try {
+    const response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd");
+    const data = await response.json();
+    console.log("🧪 BTC API Response:", data);
+    if (data.bitcoin && data.bitcoin.usd) {
+      return data.bitcoin.usd;
+    } else {
+      throw new Error("بيانات البيتكوين غير متوفرة");
+    }
+  } catch (error) {
+    console.error("❌ fetchBTCPrice Error:", error.message);
+    return null;
+  }
 }
 
 // 🔎 تحليل
@@ -156,7 +173,7 @@ function analyzeAsset(price, history, assetName) {
 
 // 🚀 إرسال لتليغرام
 async function sendToTelegram(text) {
-  const url = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`;
+  const url = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage";
   await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -175,6 +192,8 @@ async function run() {
     const goldPrice = await fetchGoldPrice();
     const btcPrice = await fetchBTCPrice();
     console.log("✅ GOLD:", goldPrice, "| ✅ BTC:", btcPrice);
+
+    if (!goldPrice || !btcPrice) return;
 
     const goldSignal = analyzeAsset(goldPrice, goldHistory, "الذهب");
     const btcSignal = analyzeAsset(btcPrice, btcHistory, "البيتكوين");
