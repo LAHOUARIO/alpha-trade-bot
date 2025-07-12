@@ -1,5 +1,3 @@
-
-// 🔧 إعداد البيئة
 require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -16,12 +14,11 @@ let goldHistory = [];
 let btcHistory = [];
 let latestSignals = [];
 
-// 🛠️ إعداد الميدل وير
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "../public")));
 
-// ⌛️ تحقق الاشتراك
+// تحقق الاشتراك
 function isExpired(user) {
   const start = new Date(user.startDate);
   const end = new Date(start);
@@ -29,24 +26,21 @@ function isExpired(user) {
   return new Date() > end;
 }
 
-// 🔑 تسجيل الدخول
+// تسجيل الدخول
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
   const users = JSON.parse(fs.readFileSync(USERS_FILE));
   const user = users.find(u => u.username === username && u.password === password);
-
   if (!user) return res.status(401).send("معلومات غير صحيحة");
   if (isExpired(user)) return res.status(403).send("انتهى الاشتراك");
-
   res.send("success");
 });
 
-// ➕ إضافة مستخدم
+// إضافة مستخدم
 app.post("/admin", (req, res) => {
   const { adminUser, adminPass, username, password, durationDays } = req.body;
-  if (adminUser !== process.env.ADMIN_USER || adminPass !== process.env.ADMIN_PASS) {
+  if (adminUser !== process.env.ADMIN_USER || adminPass !== process.env.ADMIN_PASS)
     return res.status(403).send("ممنوع");
-  }
 
   const users = JSON.parse(fs.readFileSync(USERS_FILE));
   users.push({
@@ -60,72 +54,38 @@ app.post("/admin", (req, res) => {
   res.send("تمت الإضافة ✅");
 });
 
-// 📄 قائمة المستخدمين (للإدارة)
-app.post("/users-list", (req, res) => {
-  const { adminUser, adminPass } = req.body;
-  if (adminUser !== process.env.ADMIN_USER || adminPass !== process.env.ADMIN_PASS) {
-    return res.status(403).send("ممنوع");
-  }
-
-  const users = JSON.parse(fs.readFileSync(USERS_FILE));
-  res.json(users);
-});
-
-// ❌ حذف مستخدم
-app.post("/delete-user", (req, res) => {
-  const { adminUser, adminPass, username } = req.body;
-  if (adminUser !== process.env.ADMIN_USER || adminPass !== process.env.ADMIN_PASS) {
-    return res.status(403).send("ممنوع");
-  }
-
-  let users = JSON.parse(fs.readFileSync(USERS_FILE));
-  users = users.filter(u => u.username !== username);
-
-  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
-  res.send("تم الحذف ✅");
-});
-
-// ✅ API الإشارات
+// API الإشارات
 app.get("/signals", (req, res) => {
   res.json(latestSignals.slice(-10).reverse());
 });
 
-// ✅ سعر الذهب
+// سعر الذهب من TwelveData
 async function fetchGoldPrice() {
   try {
-    const response = await fetch("https://www.goldapi.io/api/XAU/USD", {
-      headers: {
-        "x-access-token": process.env.GOLD_API_KEY,
-        "Content-Type": "application/json",
-      },
-    });
-    const data = await response.json();
-    console.log("🧪 GOLD API Response:", data);
-    return data.price || null;
-  } catch (error) {
-    console.error("❌ fetchGoldPrice Error:", error.message);
+    const url = `https://api.twelvedata.com/price?symbol=XAU/USD&apikey=${process.env.TWELVE_API_KEY}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    return parseFloat(data.price);
+  } catch (err) {
+    console.error("❌ GOLD ERROR:", err.message);
     return null;
   }
 }
 
-// ✅ سعر البيتكوين
+// سعر البيتكوين من TwelveData
 async function fetchBTCPrice() {
   try {
-    const response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd");
-    const data = await response.json();
-    console.log("🧪 BTC API Response:", data);
-    if (data.bitcoin && data.bitcoin.usd) {
-      return data.bitcoin.usd;
-    } else {
-      throw new Error("بيانات البيتكوين غير متوفرة");
-    }
-  } catch (error) {
-    console.error("❌ fetchBTCPrice Error:", error.message);
+    const url = `https://api.twelvedata.com/price?symbol=BTC/USD&apikey=${process.env.TWELVE_API_KEY}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    return parseFloat(data.price);
+  } catch (err) {
+    console.error("❌ BTC ERROR:", err.message);
     return null;
   }
 }
 
-// 🔎 تحليل
+// تحليل السعر
 function analyzeAsset(price, history, assetName) {
   history.push(price);
   if (history.length < 30) return null;
@@ -171,9 +131,9 @@ function analyzeAsset(price, history, assetName) {
   return null;
 }
 
-// 🚀 إرسال لتليغرام
+// إرسال إلى تيليغرام
 async function sendToTelegram(text) {
- const url = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`;
+  const url = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`;
   await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -185,7 +145,7 @@ async function sendToTelegram(text) {
   });
 }
 
-// 🧠 تشغيل البوت كل 5 د
+// تشغيل البوت كل 5 دقائق
 async function run() {
   try {
     const now = new Date().toLocaleTimeString("en-GB", { hour12: false });
@@ -217,7 +177,6 @@ async function run() {
 run();
 setInterval(run, 5 * 60 * 1000);
 
-// ✅ تشغيل السيرفر
 app.listen(PORT, () => {
   console.log(`✅ ALPHA TRADE ACADEMY bot running on http://localhost:${PORT}`);
 });
