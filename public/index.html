@@ -9,31 +9,39 @@
       margin: 0;
       padding: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #1e1b2e, #2d1a4c);
+      background: url('/images/background.jpg') no-repeat center center fixed;
+      background-size: cover;
       color: #fff;
-      text-align: center;
+    }
+
+    .overlay {
+      background-color: rgba(0, 0, 0, 0.7); /* خلفية شفافة */
+      min-height: 100vh;
       padding: 60px 20px;
+      text-align: center;
     }
 
     h1 {
       font-size: 3em;
-      color: #bb86fc;
+      color: #ffce54;
       margin-bottom: 10px;
+      text-shadow: 0 0 10px #000;
     }
 
     p {
       font-size: 1.2em;
-      color: #e0e0e0;
+      color: #f2f2f2;
       margin-bottom: 40px;
       line-height: 1.8;
       max-width: 600px;
       margin-left: auto;
       margin-right: auto;
+      text-shadow: 0 0 5px #000;
     }
 
     .start-btn {
       display: inline-block;
-      background: #bb86fc;
+      background: #ffce54;
       color: #1e1b2e;
       padding: 14px 28px;
       text-decoration: none;
@@ -44,30 +52,33 @@
     }
 
     .start-btn:hover {
-      background: #d6a2ff;
+      background: #ffd97e;
     }
 
     footer {
       margin-top: 60px;
-      color: #888;
+      color: #ccc;
       font-size: 0.9em;
+      text-shadow: 0 0 3px #000;
     }
   </style>
 </head>
 <body>
 
-  <h1>🎓 ALPHA TRADE ACADEMY</h1>
-  <p>
-    مرحبًا بك في منصتنا التعليمية الشاملة!<br>
-    تقدم لك ALPHA TRADE ACADEMY أدوات قوية للتحليل الفني،
-    إشارات تداول مباشرة للذهب والبيتكوين، ودروس احترافية مصممة خصيصًا لكل من يريد احتراف عالم التداول.
-  </p>
+  <div class="overlay">
+    <h1>🎓 ALPHA TRADE ACADEMY</h1>
+    <p>
+      مرحبًا بك في منصتنا التعليمية الشاملة!<br>
+      تقدم لك ALPHA TRADE ACADEMY أدوات قوية للتحليل الفني،
+      إشارات تداول مباشرة للذهب والبيتكوين، ودروس احترافية مصممة خصيصًا لكل من يريد احتراف عالم التداول.
+    </p>
 
-  <a class="start-btn" href="/login.html">🚀 ابدأ الآن</a>
+    <a class="start-btn" href="/login.html">🚀 ابدأ الآن</a>
 
-  <footer>
-    &copy; 2025 - جميع الحقوق محفوظة لـ ALPHA TRADE ACADEMY
-  </footer>
+    <footer>
+      &copy; 2025 - جميع الحقوق محفوظة لـ ALPHA TRADE ACADEMY
+    </footer>
+  </div>
 
 </body>
 </html>
