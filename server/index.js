@@ -1,10 +1,13 @@
+// 🔧 إعداد البيئة
 require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const fs = require("fs");
 const fetch = require("node-fetch");
 const path = require("path");
-const { RSI, MACD, EMA } = require("technicalindicators");
+const {
+  RSI, MACD, EMA, CCI, BollingerBands, StochasticRSI, ADX
+} = require("technicalindicators");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,11 +17,29 @@ let goldHistory = [];
 let btcHistory = [];
 let latestSignals = [];
 
+let lastGoldPrice = null;
+let lastBTCPrice = null;
+
+// 🧪 إشارة تجريبية
+setTimeout(() => {
+  const now = new Date().toLocaleTimeString("en-GB", { hour12: false });
+  const testSignal = {
+    asset: "الذهب",
+    signal: "📈 BUY ⬆",
+    reasons: ["RSI", "MACD"],
+    strength: "🟢 قوية ✅",
+    time: now
+  };
+  latestSignals.push(testSignal);
+  console.log("✅ إشارة تجريبية أضيفت للموقع");
+}, 3000);
+
+// 🛠️ ميدل وير
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "../public")));
 
-// تحقق الاشتراك
+// 🔒 تحقق الاشتراك
 function isExpired(user) {
   const start = new Date(user.startDate);
   const end = new Date(start);
@@ -26,7 +47,7 @@ function isExpired(user) {
   return new Date() > end;
 }
 
-// تسجيل الدخول
+// 🔐 تسجيل الدخول
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
   const users = JSON.parse(fs.readFileSync(USERS_FILE));
@@ -36,7 +57,7 @@ app.post("/login", (req, res) => {
   res.send("success");
 });
 
-// إضافة مستخدم
+// ➕ إضافة مستخدم
 app.post("/admin", (req, res) => {
   const { adminUser, adminPass, username, password, durationDays } = req.body;
   if (adminUser !== process.env.ADMIN_USER || adminPass !== process.env.ADMIN_PASS)
@@ -49,57 +70,80 @@ app.post("/admin", (req, res) => {
     startDate: new Date().toISOString().split("T")[0],
     durationDays: parseInt(durationDays),
   });
-
   fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
   res.send("تمت الإضافة ✅");
 });
 
-// API الإشارات
-app.get("/signals", (req, res) => {
-  res.json(latestSignals.slice(-10).reverse());
+// 📄 قائمة المستخدمين
+app.post("/users-list", (req, res) => {
+  const { adminUser, adminPass } = req.body;
+  if (adminUser !== process.env.ADMIN_USER || adminPass !== process.env.ADMIN_PASS)
+    return res.status(403).send("ممنوع");
+
+  const users = JSON.parse(fs.readFileSync(USERS_FILE));
+  res.json(users);
 });
 
-// سعر الذهب من TwelveData
+// ❌ حذف مستخدم
+app.post("/delete-user", (req, res) => {
+  const { adminUser, adminPass, username } = req.body;
+  if (adminUser !== process.env.ADMIN_USER || adminPass !== process.env.ADMIN_PASS)
+    return res.status(403).send("ممنوع");
+
+  let users = JSON.parse(fs.readFileSync(USERS_FILE));
+  users = users.filter(u => u.username !== username);
+  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+  res.send("تم الحذف ✅");
+});
+
+// ✅ API الإشارات
+app.get("/signals", (req, res) => {
+  res.json({
+    title: "Alpha Trade Academy",
+    prices: {
+      "الذهب": lastGoldPrice,
+      "البيتكوين": lastBTCPrice
+    },
+    signals: latestSignals.slice(-10).reverse()
+  });
+});
+
+// ✅ سعر الذهب
 async function fetchGoldPrice() {
   try {
-    const url = `https://api.twelvedata.com/price?symbol=XAU/USD&apikey=${process.env.TWELVE_API_KEY}`;
-    const res = await fetch(url);
-    const data = await res.json();
+    const response = await fetch(`https://api.twelvedata.com/price?symbol=XAU/USD&apikey=${process.env.TWELVE_API_KEY}`);
+    const data = await response.json();
     return parseFloat(data.price);
-  } catch (err) {
-    console.error("❌ GOLD ERROR:", err.message);
+  } catch (error) {
+    console.error("❌ fetchGoldPrice Error:", error.message);
     return null;
   }
 }
 
-// سعر البيتكوين من TwelveData
+// ✅ سعر البيتكوين
 async function fetchBTCPrice() {
   try {
-    const url = `https://api.twelvedata.com/price?symbol=BTC/USD&apikey=${process.env.TWELVE_API_KEY}`;
-    const res = await fetch(url);
-    const data = await res.json();
+    const response = await fetch(`https://api.twelvedata.com/price?symbol=BTC/USD&apikey=${process.env.TWELVE_API_KEY}`);
+    const data = await response.json();
     return parseFloat(data.price);
-  } catch (err) {
-    console.error("❌ BTC ERROR:", err.message);
+  } catch (error) {
+    console.error("❌ fetchBTCPrice Error:", error.message);
     return null;
   }
 }
 
-// تحليل السعر
+// 🔍 تحليل الأصل
 function analyzeAsset(price, history, assetName) {
   history.push(price);
-  if (history.length < 30) return null;
+  if (history.length < 50) return null;
 
   const rsi = RSI.calculate({ values: history, period: 14 }).slice(-1)[0];
-  const macd = MACD.calculate({
-    values: history,
-    fastPeriod: 12,
-    slowPeriod: 26,
-    signalPeriod: 9,
-    SimpleMAOscillator: false,
-    SimpleMASignal: false,
-  }).slice(-1)[0];
+  const macd = MACD.calculate({ values: history, fastPeriod: 12, slowPeriod: 26, signalPeriod: 9 }).slice(-1)[0];
   const ema = EMA.calculate({ values: history, period: 20 }).slice(-1)[0];
+  const cci = CCI.calculate({ high: history, low: history, close: history, period: 20 }).slice(-1)[0];
+  const bb = BollingerBands.calculate({ values: history, period: 20, stdDev: 2 }).slice(-1)[0];
+  const adx = ADX.calculate({ close: history, high: history, low: history, period: 14 }).slice(-1)[0];
+  const stochRsi = StochasticRSI.calculate({ values: history, rsiPeriod: 14, stochasticPeriod: 14, kPeriod: 3, dPeriod: 3 }).slice(-1)[0];
 
   let signal = null;
   let reasons = [];
@@ -107,6 +151,10 @@ function analyzeAsset(price, history, assetName) {
   if (rsi < 30) reasons.push("RSI");
   if (macd.histogram > 0) reasons.push("MACD");
   if (price > ema) reasons.push("EMA");
+  if (cci < -100) reasons.push("CCI");
+  if (bb && price < bb.lower) reasons.push("Bollinger");
+  if (adx && adx.adx > 20) reasons.push("ADX");
+  if (stochRsi && stochRsi.k < 20) reasons.push("StochRSI");
 
   if (reasons.length >= 2) {
     signal = "📈 BUY ⬆";
@@ -117,6 +165,10 @@ function analyzeAsset(price, history, assetName) {
   if (rsi > 70) reasons.push("RSI");
   if (macd.histogram < 0) reasons.push("MACD");
   if (price < ema) reasons.push("EMA");
+  if (cci > 100) reasons.push("CCI");
+  if (bb && price > bb.upper) reasons.push("Bollinger");
+  if (adx && adx.adx > 20) reasons.push("ADX");
+  if (stochRsi && stochRsi.k > 80) reasons.push("StochRSI");
 
   if (reasons.length >= 2 && !signal) {
     signal = "📉 SELL ⬇";
@@ -124,14 +176,14 @@ function analyzeAsset(price, history, assetName) {
 
   if (signal && reasons.length >= 2) {
     let strength = "🟡 متوسطة";
-    if (reasons.length >= 3) strength = "🟢 قوية ✅";
+    if (reasons.length >= 4) strength = "🟢 قوية ✅";
     return { asset: assetName, signal, reasons, strength };
   }
 
   return null;
 }
 
-// إرسال إلى تيليغرام
+// 🚀 إرسال لتليغرام
 async function sendToTelegram(text) {
   const url = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`;
   await fetch(url, {
@@ -140,19 +192,21 @@ async function sendToTelegram(text) {
     body: JSON.stringify({
       chat_id: process.env.TELEGRAM_CHANNEL_ID,
       text,
-      parse_mode: "Markdown",
-    }),
+      parse_mode: "Markdown"
+    })
   });
 }
 
-// تشغيل البوت كل 5 دقائق
+// 🧠 تشغيل البوت كل 5 دقائق
 async function run() {
   try {
     const now = new Date().toLocaleTimeString("en-GB", { hour12: false });
     const goldPrice = await fetchGoldPrice();
     const btcPrice = await fetchBTCPrice();
-    console.log("✅ GOLD:", goldPrice, "| ✅ BTC:", btcPrice);
+    lastGoldPrice = goldPrice;
+    lastBTCPrice = btcPrice;
 
+    console.log("✅ GOLD:", goldPrice, "| ✅ BTC:", btcPrice);
     if (!goldPrice || !btcPrice) return;
 
     const goldSignal = analyzeAsset(goldPrice, goldHistory, "الذهب");
@@ -169,6 +223,8 @@ async function run() {
       latestSignals.push({ ...btcSignal, time: now });
       await sendToTelegram(msg);
     }
+
+    await sendToTelegram(`💰 *أسعار السوق - Alpha Trade Academy*\n- الذهب: ${goldPrice}\n- البيتكوين: ${btcPrice}`);
   } catch (err) {
     console.error("❌ خطأ:", err.message);
   }

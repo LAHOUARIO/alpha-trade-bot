@@ -2,95 +2,129 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>ALPHA TRADE ACADEMY - دخول</title>
+  <title>تسجيل الدخول - ALPHA TRADE ACADEMY</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to bottom, #000000, #111111);
+      background: #1e1b2e;
       color: #fff;
+      font-family: 'Segoe UI', sans-serif;
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       height: 100vh;
       margin: 0;
     }
-    h1 {
-      color: gold;
-      margin-bottom: 20px;
+
+    .container {
+      background: #2c2546;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px #9b59b6;
+      width: 350px;
     }
-    form {
-      background: #1a1a1a;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px #000;
-      width: 300px;
-      display: flex;
-      flex-direction: column;
+
+    h2 {
+      text-align: center;
+      color: #d9b3ff;
     }
+
     input {
-      margin: 10px 0;
+      width: 100%;
       padding: 10px;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-    }
-    button {
-      background: gold;
-      color: #000;
-      font-weight: bold;
-      padding: 10px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    button:hover {
-      background: #ffd700;
-    }
-    .error {
-      color: red;
       margin-top: 10px;
+      margin-bottom: 15px;
+      border: none;
+      border-radius: 5px;
+      background: #eee;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #8e44ad;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #732d91;
+    }
+
+    .switch {
+      text-align: center;
+      margin-top: 10px;
+      cursor: pointer;
+      color: #ccc;
+      font-size: 14px;
+    }
+
+    .switch:hover {
+      color: #fff;
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
-  <h1>ALPHA TRADE ACADEMY</h1>
-  <form id="loginForm">
-    <input type="text" name="username" placeholder="اسم المستخدم" required />
-    <input type="password" name="password" placeholder="كلمة السر" required />
-    <button type="submit">دخول</button>
-    <div class="error" id="errorMsg"></div>
-  </form>
+  <div class="container">
+    <h2 id="formTitle">🔐 دخول المستخدم</h2>
+    <input type="text" id="username" placeholder="اسم المستخدم" />
+    <input type="password" id="password" placeholder="كلمة المرور" />
+    <button onclick="login()">دخول</button>
+    <div class="switch" onclick="toggleMode()">أنت مدير؟ اضغط هنا</div>
+  </div>
 
   <script>
-    const form = document.getElementById("loginForm");
-    const errorMsg = document.getElementById("errorMsg");
+    let isAdmin = false;
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      errorMsg.textContent = "";
+    function toggleMode() {
+      isAdmin = !isAdmin;
+      document.getElementById("formTitle").innerText = isAdmin ? "⚙️ دخول المدير" : "🔐 دخول المستخدم";
+    }
 
-      const data = {
-        username: form.username.value,
-        password: form.password.value
-      };
+    async function login() {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
 
-      const res = await fetch("/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-      });
+      if (isAdmin) {
+        const res = await fetch("/admin", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            adminUser: username,
+            adminPass: password,
+            username: "skip",
+            password: "skip",
+            durationDays: 1
+          })
+        });
 
-      const text = await res.text();
+        if (res.status === 403) {
+          alert("⚠️ معلومات المدير غير صحيحة");
+        } else {
+          localStorage.setItem("adminLoggedIn", "true");
+          window.location.href = "/admin.html";
+        }
 
-      if (res.ok) {
-        localStorage.setItem("loggedIn", "true");
-        window.location.href = "/dashboard.html";
       } else {
-        errorMsg.textContent = text;
+        const res = await fetch("/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
+        });
+
+        const result = await res.text();
+
+        if (result === "success") {
+          localStorage.setItem("loggedIn", "true");
+          window.location.href = "/welcome.html";
+        } else {
+          alert(result);
+        }
       }
-    });
+    }
   </script>
 </body>
 </html>

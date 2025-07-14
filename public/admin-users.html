@@ -7,62 +7,106 @@
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: #111;
-      color: gold;
+      background: linear-gradient(135deg, #2a2a4e, #1c1c3c);
+      color: #fff;
       margin: 0;
-      padding: 20px;
+      padding: 30px;
     }
+
     h1 {
       text-align: center;
+      color: #bb86fc;
+      margin-bottom: 30px;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    th, td {
-      border: 1px solid gold;
-      padding: 10px;
-      text-align: center;
-    }
-    th {
-      background-color: #222;
-    }
-    .expired {
-      color: red;
-    }
-    .active {
-      color: lime;
-    }
+
     input {
       margin-bottom: 10px;
-      padding: 10px;
+      padding: 12px;
       width: 100%;
       box-sizing: border-box;
-      background: #222;
-      color: gold;
-      border: 1px solid gold;
+      background: #2f2f4f;
+      color: #fff;
+      border: 1px solid #bb86fc;
+      border-radius: 6px;
     }
+
     button {
-      padding: 10px 20px;
-      background: gold;
-      color: #000;
+      padding: 12px 20px;
+      background: #bb86fc;
+      color: #1c1c3c;
       font-weight: bold;
       border: none;
       cursor: pointer;
+      border-radius: 6px;
       width: 100%;
       margin-bottom: 10px;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #d4a5ff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 30px;
+      background: #2e2e4e;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+    }
+
+    th, td {
+      border: 1px solid #444;
+      padding: 12px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #3d3d5c;
+      color: #bb86fc;
+    }
+
+    td {
+      color: #eee;
+    }
+
+    .expired {
+      color: #ff4c4c;
+      font-weight: bold;
+    }
+
+    .active {
+      color: #66ff99;
+      font-weight: bold;
+    }
+
+    .section {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 10px;
+      flex-direction: column;
     }
   </style>
 </head>
 <body>
-  <h1>📋 قائمة المشتركين</h1>
-  <div>
+  <h1>📋 قائمة المشتركين - ALPHA TRADE ACADEMY</h1>
+
+  <div class="section">
     <input type="text" id="adminUser" placeholder="👤 اسم المدير">
     <input type="password" id="adminPass" placeholder="🔑 كلمة السر">
-    <button onclick="loadUsers()">عرض القائمة</button>
-    <button onclick="exportToCSV()">📤 تصدير كـ CSV</button>
+
+    <div class="buttons">
+      <button onclick="loadUsers()">📥 عرض القائمة</button>
+      <button onclick="exportToCSV()">📤 تصدير كـ CSV</button>
+    </div>
   </div>
+
   <table id="usersTable" style="display:none">
     <thead>
       <tr>

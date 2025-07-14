@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <title>لوحة الإدارة - ALPHA TRADE ACADEMY</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      background-color: #111;
+      background: linear-gradient(135deg, #2a2a4e, #1c1c3c);
       color: #fff;
       font-family: 'Segoe UI', sans-serif;
       margin: 0;
@@ -15,67 +16,83 @@
     h1 {
       text-align: center;
       margin-bottom: 30px;
+      color: #bb86fc;
     }
 
     form {
-      max-width: 400px;
+      max-width: 450px;
       margin: 0 auto;
-      background: #1f1f1f;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #000;
+      background: #2e2e4e;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
     }
 
     input, button {
       width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 5px;
+      padding: 12px;
+      margin: 12px 0;
+      border-radius: 6px;
       border: none;
       font-size: 16px;
     }
 
     input {
-      background-color: #222;
+      background-color: #444;
       color: #fff;
     }
 
     button {
-      background-color: #007bff;
-      color: white;
-      cursor: pointer;
+      background-color: #bb86fc;
+      color: #1c1c3c;
       font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
     }
 
     button:hover {
-      background-color: #0056b3;
+      background-color: #d6a2ff;
+    }
+
+    hr {
+      border: 0;
+      height: 1px;
+      background: #666;
+      margin: 20px 0;
     }
 
     .message {
-      margin-top: 10px;
+      margin-top: 15px;
       text-align: center;
       font-weight: bold;
+      font-size: 0.95em;
     }
 
     .error {
-      color: red;
+      color: #ff4c4c;
     }
 
     .success {
-      color: green;
+      color: #66ff99;
     }
   </style>
 </head>
 <body>
-  <h1>لوحة إدارة المستخدمين</h1>
+
+  <h1>⚙️ لوحة إدارة المستخدمين</h1>
+
   <form id="adminForm">
-    <input type="text" name="adminUser" placeholder="اسم المدير" required />
-    <input type="password" name="adminPass" placeholder="كلمة سر المدير" required />
+    <input type="text" name="adminUser" placeholder="👨‍💼 اسم المدير" required />
+    <input type="password" name="adminPass" placeholder="🔐 كلمة سر المدير" required />
+
     <hr>
-    <input type="text" name="username" placeholder="اسم المستخدم الجديد" required />
-    <input type="password" name="password" placeholder="كلمة سر المستخدم" required />
-    <input type="number" name="durationDays" placeholder="مدة الاشتراك بالأيام" required />
+
+    <input type="text" name="username" placeholder="👤 اسم المستخدم الجديد" required />
+    <input type="password" name="password" placeholder="🔑 كلمة سر المستخدم" required />
+    <input type="number" name="durationDays" placeholder="📅 مدة الاشتراك بالأيام" required />
+
     <button type="submit">➕ إضافة المستخدم</button>
+
     <div class="message" id="msg"></div>
   </form>
 
