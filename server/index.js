@@ -135,7 +135,7 @@ async function fetchBTCPrice() {
 // 🔍 تحليل الأصل
 function analyzeAsset(price, history, assetName) {
   history.push(price);
-  if (history.length < 50) return null;
+  if (history.length < 20) return null;
 
   const rsi = RSI.calculate({ values: history, period: 14 }).slice(-1)[0];
   const macd = MACD.calculate({ values: history, fastPeriod: 12, slowPeriod: 26, signalPeriod: 9 }).slice(-1)[0];
@@ -156,7 +156,7 @@ function analyzeAsset(price, history, assetName) {
   if (adx && adx.adx > 20) reasons.push("ADX");
   if (stochRsi && stochRsi.k < 20) reasons.push("StochRSI");
 
-  if (reasons.length >= 2) {
+  if (reasons.length >= 1) {
     signal = "📈 BUY ⬆";
   } else {
     reasons = [];
@@ -170,11 +170,11 @@ function analyzeAsset(price, history, assetName) {
   if (adx && adx.adx > 20) reasons.push("ADX");
   if (stochRsi && stochRsi.k > 80) reasons.push("StochRSI");
 
-  if (reasons.length >= 2 && !signal) {
+  if (reasons.length >= 1 && !signal) {
     signal = "📉 SELL ⬇";
   }
 
-  if (signal && reasons.length >= 2) {
+  if (signal && reasons.length >= 1) {
     let strength = "🟡 متوسطة";
     if (reasons.length >= 4) strength = "🟢 قوية ✅";
     return { asset: assetName, signal, reasons, strength };
@@ -197,7 +197,7 @@ async function sendToTelegram(text) {
   });
 }
 
-// 🧠 تشغيل البوت كل 5 دقائق
+// 🧠 تشغيل البوت كل 15 دقيقة
 async function run() {
   try {
     const now = new Date().toLocaleTimeString("en-GB", { hour12: false });
@@ -231,7 +231,7 @@ async function run() {
 }
 
 run();
-setInterval(run, 5 * 60 * 1000);
+setInterval(run, 15 * 60 * 1000); // كل 15 دقيقة
 
 app.listen(PORT, () => {
   console.log(`✅ ALPHA TRADE ACADEMY bot running on http://localhost:${PORT}`);

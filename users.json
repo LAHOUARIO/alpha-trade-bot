@@ -4,5 +4,17 @@
     "password": "1234",
     "startDate": "2025-07-12",
     "durationDays": 30
+  },
+  {
+    "username": "skip",
+    "password": "skip",
+    "startDate": "2025-07-15",
+    "durationDays": 1
+  },
+  {
+    "username": "nora",
+    "password": "nora2025",
+    "startDate": "2025-07-15",
+    "durationDays": 200
   }
 ]
