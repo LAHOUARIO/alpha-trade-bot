@@ -15,7 +15,7 @@
     }
 
     .overlay {
-      background-color: rgba(0, 0, 0, 0.7); /* خلفية شفافة */
+      background-color: rgba(0, 0, 0, 0.7);
       min-height: 100vh;
       padding: 60px 20px;
       text-align: center;
@@ -39,7 +39,15 @@
       text-shadow: 0 0 5px #000;
     }
 
-    .start-btn {
+    .button-group {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    .btn {
       display: inline-block;
       background: #ffce54;
       color: #1e1b2e;
@@ -51,7 +59,7 @@
       transition: background 0.3s ease;
     }
 
-    .start-btn:hover {
+    .btn:hover {
       background: #ffd97e;
     }
 
@@ -73,7 +81,11 @@
       إشارات تداول مباشرة للذهب والبيتكوين، ودروس احترافية مصممة خصيصًا لكل من يريد احتراف عالم التداول.
     </p>
 
-    <a class="start-btn" href="/login.html">🚀 ابدأ الآن</a>
+    <!-- أزرار -->
+    <div class="button-group">
+      <a class="btn" href="/login.html">🚀 ابدأ الآن</a>
+      <a class="btn" href="/offers.html">🎁 عروض و خدمات</a>
+    </div>
 
     <footer>
       &copy; 2025 - جميع الحقوق محفوظة لـ ALPHA TRADE ACADEMY
